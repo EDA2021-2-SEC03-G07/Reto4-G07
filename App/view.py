@@ -44,6 +44,7 @@ def printMenu():
     print("6- Cuantificar el efecto de un aeropuerto cerrado")
     print("7- Comparar con servicio WEB externo")
     print("8- Visualizar gráficamente los requerimientos")
+
 catalog = None
 
 """
@@ -53,8 +54,13 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
-        print("Cargando información de los archivos ....")
-
+            print("Cargando información de los archivos ....")
+            catalog = controller.init_Catalog()
+            controller.loadCSVs(catalog)
+            info = controller.infographs(catalog)
+            print('Total aeropuertos en Dirigido: '+str(info[1]))
+            print('Total rutas en Dirigido: '+str(info[0]))
+            print('Total ciudades: '+str(info[2]))
     elif int(inputs[0]) == 2:
         pass
 
