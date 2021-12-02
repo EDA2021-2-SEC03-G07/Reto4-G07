@@ -47,30 +47,21 @@ def loadCSVs(catalog):
     citiesfile = cf.data_dir + 'worldcities.csv'
     cities_file = csv.DictReader(open(citiesfile, encoding="utf-8"),
                                 delimiter=",")
-    for city in cities_file:
-        model.addCity(catalog, city)
+    # for city in cities_file:
+    #     model.addCity(catalog, city)
         
     airportsfile = cf.data_dir + 'airports_full.csv'
     airports_file = csv.DictReader(open(airportsfile, encoding="utf-8"),
                                 delimiter=",")
-    for airport in airports_file:
-        model.addAirport(catalog, airport)
+    # for airport in airports_file:
+    #     model.addAirport(catalog, airport)
 
     routesfile = cf.data_dir + 'routes_full.csv'
     routes_file = csv.DictReader(open(routesfile, encoding="utf-8"),
                                 delimiter=",")
     for route in routes_file:
-        model.addAirportConnection(catalog, route)
-
+        model.addIATAs(catalog, route)
     return catalog
-
-def infographs(catalog):
-    graph = catalog['Una_Dirección']
-    size_edges = numEdges(graph)
-    size_vertices = numVertices(graph)
-    cities = catalog['Ciudades']
-    sizecity = mp.size(cities)
-    return size_edges, size_vertices, sizecity
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo

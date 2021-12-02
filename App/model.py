@@ -47,65 +47,66 @@ def init_Catalog(): #Comentar
    components: Almacena la informacion de los componentes conectados
    paths: Estructura que almancena los caminos de costo minimo desde un
            vertice determinado a todos los otros vértices del grafo
-    """
+    """ 
+    #La idea es que guarde dentro de el mapa IATA las keys son el IATA de cada ciudad y los valores los IATA que tienen como destino ese mismo
     try:
-        catalog = {'Aeropuerto': None,
-                    'Ciudades': None,
-                    'Una_Dirección': None,
-                    'Doble_Dirección': None
-                    }
-
-        catalog['Aeropuerto'] = mp.newMap(numelements=9000,
-                                     maptype='PROBING')
-
-        catalog['Ciudades'] = mp.newMap(numelements=4999,
-                                     maptype='PROBING')
-
-        catalog['Una_Dirección'] = gr.newGraph(datastructure='ADJ_LIST',
-                                              directed=True,
-                                              size=10700,
-                                              comparefunction=None)
-        
-        catalog['Doble_Dirección'] = gr.newGraph(datastructure='ADJ_LIST',
-                                              directed=False,
-                                              size=10700,
-                                              comparefunction=None)
-
+        catalog =  {'DirectedConnections':None,
+                    'No_DirectedConnections': None,
+                    "IATA's_Cities": None}
+        catalog['DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
+                                            directed=True,
+                                            size=10700,
+                                            comparefunction=None)
+        catalog['No_DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
+                                            directed=False,
+                                            size=10700,
+                                            comparefunction=None)
+        catalog["IATAs"] = mp.newMap(numelements=1,
+                                      maptype='PROBING')
         return catalog
     except Exception as exp:
-        error.reraise(exp, 'model:init()')
+         error.reraise(exp, 'model:init_Catalog((')
 
 # Funciones para agregar informacion al catalogo
-
-def addAirport(catalog, airport):
-    Airport_Added = mp.put(catalog['Aeropuerto'], airport['IATA'], airport)
-    return Airport_Added
-def addCity(catalog, city):
-    City_Added = mp.put(catalog['Ciudades'], city['city'], city)
-    return City_Added
-
-def addAirportConnection(catalog, Ruta):
-        Salida = Ruta["Departure"]
-        Destino = Ruta["Destination"]
-        Distancia = Ruta["distance_km"]
-        addVertexAirport(catalog, Salida)
-        addVertexAirport(catalog, Destino)
-        addConnection(catalog, Salida, Destino, Distancia)
-        return catalog
-
-def addVertexAirport(catalog, IATA):
-        if not gr.containsVertex(catalog['Una_Dirección'], IATA):
-            gr.insertVertex(catalog['Una_Dirección'], IATA)
-        
-        if not gr.containsVertex(catalog['Una_Dirección'], IATA):
-            gr.insertVertex(catalog['Doble_Dirección'], IATA)
-        return catalog
-
-def addConnection(catalog, Salida, Destino, Distancia):
-    edge = gr.getEdge(catalog['Una_Dirección'], Salida, Destino)
-    if edge is None:
-        gr.addEdge(catalog['Una_Dirección'], Salida, Destino, Distancia)
+            #Para poder seleccionar que sean digrafos y no dirigidos hay que hacer una función de comparación en donde
+            #Hacer dos For in en donde se recorra el mapa[IATA]. El primero recorrerá las llaves, y el segundo la lista que contiene los IATA que tienen como destino
+            #el IATA-key.
+            # Después de eso un mp.get en el mapa IATA_cities con cada valor de la lista. Si está, hacer un lt.isPresent con la lista de valores  
+def addIATAs(catalog, IATA):
+    Maps_IATA = catalog['IATAs']
+    Origin = IATA['Departure']
+    Destination = IATA['Destination']
+    Distance = IATA['distance_km']
+    Airline = IATA['Airline']
+    if mp.contains(Maps_IATA, Origin) == False:
+        # lst_Destination = lt.newList(datastructure='ARRAY_LIST')
+        # lt.addLast(lst_Destination, Destination)
+        # lt.addLast(lst_Destination, Distance) #Es una arraylist con dos items, el primero el destino y el segundo la distancia en km
+        mp_Destination = mp.newMap(numelements=1,
+                                    maptype='CHAINING')
+        lst_airline = lt.newList(datastructure='ARRAY_LIST')
+        if mp.contains(mp_Destination, Destination) == False:
+            lt.addLast(lst_airline, Airline)
+            mp.put(mp_Destination, Destination, lst_airline)
+            mp.put(Maps_IATA, Origin, mp_Destination)
+    else:
+        Key_valueOrigin = mp.get(Maps_IATA, Origin)
+        Value_Origin = me.getValue(Key_valueOrigin) #Aquí va a tener como valor un mapa
+        Key_valueDestination = mp.get(Value_Origin, Destination)
+        if Key_valueDestination != None:
+            Value_Destination = me.getValue(Key_valueDestination) #Esto será una lista con las airlines
+            lt.addLast(Value_Destination, Airline)
     return catalog
+
+#AVANCE PARA HOMONIMAS
+        #Para lograr diferenciar las ciudades homonimas, hay que diferenciarlas por "admin_name"
+        #Para lograr poder clasificarlas correctamente y que el usuario pueda pedirlas sin ningún problema
+        #Es necesario crear un mapa que contenga como llave la ciudad homonima, y dentro de esta llave,
+        #que el valor que le corresponda sea lo que las diferencia, en este caso, lo más sencillo de diferenciar es por
+        #'admin_name' y que de ahí contenga los datos correspondientes que se necesitan dar como respuesta. 
+        #Aún no hemos podido dar con el chiste de lograr diferenciar los dirigidos con los no dirigidos, o sea, hasta el momento sólo ideas que han fracasado.
+        #Así que por el momento el avance que podemos presentar es el pseudocódigo de cómo listaremos las ciudades homonimas
+        #Nota: Si no ven la adición de datos en los graphs es porque tocó hacerlo nuevamente :)
 
 
 # Funciones para creacion de datos
