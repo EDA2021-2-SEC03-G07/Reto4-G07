@@ -53,14 +53,16 @@ def loadCSVs(catalog):
     airportsfile = cf.data_dir + 'airports_full.csv'
     airports_file = csv.DictReader(open(airportsfile, encoding="utf-8"),
                                 delimiter=",")
-    # for airport in airports_file:
-    #     model.addAirport(catalog, airport)
+    for airport in airports_file:
+        model.addAirport(catalog, airport)
 
     routesfile = cf.data_dir + 'routes_full.csv'
     routes_file = csv.DictReader(open(routesfile, encoding="utf-8"),
                                 delimiter=",")
     for route in routes_file:
         model.addIATAs(catalog, route)
+    for route in routes_file:
+        model.isDirected_orNot(catalog, route)
     return catalog
 # Funciones de ordenamiento
 

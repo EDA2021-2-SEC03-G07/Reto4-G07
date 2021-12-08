@@ -57,7 +57,6 @@ while True:
             print("Cargando información de los archivos ....")
             catalog = controller.init_Catalog()
             controller.loadCSVs(catalog)
-            info = controller.infographs(catalog)
             print('Total aeropuertos en Dirigido: '+str(info[1]))
             print('Total rutas en Dirigido: '+str(info[0]))
             print('Total ciudades: '+str(info[2]))

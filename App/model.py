@@ -55,11 +55,11 @@ def init_Catalog(): #Comentar
                     "IATA's_Cities": None}
         catalog['DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
                                             directed=True,
-                                            size=10700,
+                                            size=1000,
                                             comparefunction=None)
         catalog['No_DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
                                             directed=False,
-                                            size=10700,
+                                            size=1000,
                                             comparefunction=None)
         catalog["IATAs"] = mp.newMap(numelements=1,
                                       maptype='PROBING')
@@ -72,32 +72,69 @@ def init_Catalog(): #Comentar
             #Hacer dos For in en donde se recorra el mapa[IATA]. El primero recorrerá las llaves, y el segundo la lista que contiene los IATA que tienen como destino
             #el IATA-key.
             # Después de eso un mp.get en el mapa IATA_cities con cada valor de la lista. Si está, hacer un lt.isPresent con la lista de valores  
-def addIATAs(catalog, IATA):
+def addIATAs(catalog, IATA): #Teniendo esto, ya es posible hacer la comparación para definir directed y no directed
+    #ADICIÓN A LA HASHTABLE
     Maps_IATA = catalog['IATAs']
     Origin = IATA['Departure']
     Destination = IATA['Destination']
-    Distance = IATA['distance_km']
-    Airline = IATA['Airline']
+    Origin_Destino = IATA['Departure'] + "-" + IATA['Destination']
+
     if mp.contains(Maps_IATA, Origin) == False:
-        # lst_Destination = lt.newList(datastructure='ARRAY_LIST')
-        # lt.addLast(lst_Destination, Destination)
-        # lt.addLast(lst_Destination, Distance) #Es una arraylist con dos items, el primero el destino y el segundo la distancia en km
-        mp_Destination = mp.newMap(numelements=1,
-                                    maptype='CHAINING')
-        lst_airline = lt.newList(datastructure='ARRAY_LIST')
-        if mp.contains(mp_Destination, Destination) == False:
-            lt.addLast(lst_airline, Airline)
-            mp.put(mp_Destination, Destination, lst_airline)
-            mp.put(Maps_IATA, Origin, mp_Destination)
+        lst_destinations = lt.newList(datastructure='ARRAY_LIST')
+        lt.addLast(lst_destinations, Destination)
+        mp.put(Maps_IATA, Origin, lst_destinations)
     else:
-        Key_valueOrigin = mp.get(Maps_IATA, Origin)
-        Value_Origin = me.getValue(Key_valueOrigin) #Aquí va a tener como valor un mapa
-        Key_valueDestination = mp.get(Value_Origin, Destination)
-        if Key_valueDestination != None:
-            Value_Destination = me.getValue(Key_valueDestination) #Esto será una lista con las airlines
-            lt.addLast(Value_Destination, Airline)
+        key_value = mp.get(Maps_IATA, Origin)
+        value = me.getValue(key_value) #Esto es una lista
+        if lt.isPresent(value, Destination) == False:
+            lt.addLast(value, Destination)
     return catalog
 
+def addAirport(catalog, airport):
+    IATA = airport['IATA']
+    graph_directed = catalog['DirectedConnections']
+    graph_Nodirected = catalog['No_DirectedConnections']
+    if gr.containsVertex(graph_directed, IATA) == False:
+        gr.insertVertex(graph_directed, IATA)
+        gr.insertVertex(graph_Nodirected, IATA)
+
+def isDirected_orNot(catalog, IATA):
+    Maps_IATAS = catalog['IATAs']
+    for origen in lt.iterator(Maps_IATAS['table']):
+        origen_key = origen['key']
+        origen_value = origen['value'] #A->B
+        if origen_key != None:
+            for destinations in lt.iterator(origen_value):
+                key_value = mp.get(Maps_IATAS, destinations)
+                if key_value != None:
+                    value = me.getValue(key_value) #B->A sí es cierto, es no dirigido
+                    if lt.isPresent(value, origen_key) == True:
+                        Origin_Destino = origen_key + "-" + destinations
+                        mp.get(value_distance, Origin_Destino)
+                        a = "ES NO DIRIGIDO"
+                        addConnection_NoDirected()
+                    if lt.isPresent(value, origen_key) == False:
+                        a = "ES DIRIGIDO"
+                        addConnection_Directed()
+    pass
+
+def addConnection_Directed(catalog, origin, destination, distance):
+    """
+    Adiciona un arco entre dos aeropuertos
+    """
+    edge = gr.getEdge(catalog['DirectedConnections'], origin, destination) #Si no se encuentra el arco entre los vértices en parametro
+    if edge is None:
+        gr.addEdge(catalog['DirectedConnections'], origin, destination, distance) #Se crea la conexión
+    return catalog
+
+def addConnection_NoDirected(catalog, origin, destination, distance):
+    """
+    Adiciona un arco entre dos aeropuertos
+    """
+    edge = gr.getEdge(catalog['No_DirectedConnections'], origin, destination) #Si no se encuentra el arco entre los vértices en parametro
+    if edge is None:
+        gr.addEdge(catalog['No_DirectedConnections'], origin, destination, distance) #Se crea la conexión
+    return catalog #De lo contrario, se retorna el cátalogo
 #AVANCE PARA HOMONIMAS
         #Para lograr diferenciar las ciudades homonimas, hay que diferenciarlas por "admin_name"
         #Para lograr poder clasificarlas correctamente y que el usuario pueda pedirlas sin ningún problema
