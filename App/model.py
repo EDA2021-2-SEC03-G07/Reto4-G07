@@ -41,28 +41,23 @@ los mismos.
 # Construccion de modelos
 
 def init_Catalog(): #Comentar
-    """ Inicializa el analizador
-   stops: Tabla de hash para guardar los vertices del grafo
-   connections: Grafo para representar las rutas entre estaciones
-   components: Almacena la informacion de los componentes conectados
-   paths: Estructura que almancena los caminos de costo minimo desde un
-           vertice determinado a todos los otros vértices del grafo
-    """ 
     #La idea es que guarde dentro de el mapa IATA las keys son el IATA de cada ciudad y los valores los IATA que tienen como destino ese mismo
     try:
         catalog =  {'DirectedConnections':None,
                     'No_DirectedConnections': None,
-                    "IATA's_Cities": None}
+                    "IATAs": None}
         catalog['DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
                                             directed=True,
-                                            size=1000,
+                                            size=10000,
                                             comparefunction=None)
         catalog['No_DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
                                             directed=False,
-                                            size=1000,
+                                            size=10000,
                                             comparefunction=None)
-        catalog["IATAs"] = mp.newMap(numelements=1,
+        catalog["IATAs"] = mp.newMap(numelements=9000,
                                       maptype='PROBING')
+        catalog["distances"] = mp.newMap(numelements=9000, maptype="PROBING")
+    
         return catalog
     except Exception as exp:
          error.reraise(exp, 'model:init_Catalog((')
@@ -78,6 +73,7 @@ def addIATAs(catalog, IATA): #Teniendo esto, ya es posible hacer la comparación
     Origin = IATA['Departure']
     Destination = IATA['Destination']
     Origin_Destino = IATA['Departure'] + "-" + IATA['Destination']
+    iata_distance = IATA["distance_km"]
 
     if mp.contains(Maps_IATA, Origin) == False:
         lst_destinations = lt.newList(datastructure='ARRAY_LIST')
@@ -88,6 +84,10 @@ def addIATAs(catalog, IATA): #Teniendo esto, ya es posible hacer la comparación
         value = me.getValue(key_value) #Esto es una lista
         if lt.isPresent(value, Destination) == False:
             lt.addLast(value, Destination)
+
+    if mp.contains(Maps_IATA, Origin_Destino) == False:
+        mp.put(catalog["distances"], Origin_Destino, iata_distance)
+
     return catalog
 
 def addAirport(catalog, airport):
@@ -98,7 +98,7 @@ def addAirport(catalog, airport):
         gr.insertVertex(graph_directed, IATA)
         gr.insertVertex(graph_Nodirected, IATA)
 
-def isDirected_orNot(catalog, IATA):
+def isDirected_orNot(catalog):
     Maps_IATAS = catalog['IATAs']
     for origen in lt.iterator(Maps_IATAS['table']):
         origen_key = origen['key']
@@ -110,31 +110,27 @@ def isDirected_orNot(catalog, IATA):
                     value = me.getValue(key_value) #B->A sí es cierto, es no dirigido
                     if lt.isPresent(value, origen_key) == True:
                         Origin_Destino = origen_key + "-" + destinations
-                        mp.get(value_distance, Origin_Destino)
-                        a = "ES NO DIRIGIDO"
-                        addConnection_NoDirected()
+                        distancia= me.getValue(mp.get(catalog["distances"], Origin_Destino))
+                        addConnection_NoDirected(catalog, origen_key, destinations, distancia)
                     if lt.isPresent(value, origen_key) == False:
-                        a = "ES DIRIGIDO"
-                        addConnection_Directed()
-    pass
+                        Origin_Destino = origen_key + "-" + destinations
+                        distancia= me.getValue(mp.get(catalog["distances"], Origin_Destino))
+                        addConnection_Directed(catalog, origen_key, destinations, distancia)
+    return catalog
 
 def addConnection_Directed(catalog, origin, destination, distance):
-    """
-    Adiciona un arco entre dos aeropuertos
-    """
     edge = gr.getEdge(catalog['DirectedConnections'], origin, destination) #Si no se encuentra el arco entre los vértices en parametro
     if edge is None:
         gr.addEdge(catalog['DirectedConnections'], origin, destination, distance) #Se crea la conexión
     return catalog
 
 def addConnection_NoDirected(catalog, origin, destination, distance):
-    """
-    Adiciona un arco entre dos aeropuertos
-    """
     edge = gr.getEdge(catalog['No_DirectedConnections'], origin, destination) #Si no se encuentra el arco entre los vértices en parametro
     if edge is None:
         gr.addEdge(catalog['No_DirectedConnections'], origin, destination, distance) #Se crea la conexión
     return catalog #De lo contrario, se retorna el cátalogo
+
+
 #AVANCE PARA HOMONIMAS
         #Para lograr diferenciar las ciudades homonimas, hay que diferenciarlas por "admin_name"
         #Para lograr poder clasificarlas correctamente y que el usuario pueda pedirlas sin ningún problema

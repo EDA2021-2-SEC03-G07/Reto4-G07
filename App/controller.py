@@ -61,8 +61,8 @@ def loadCSVs(catalog):
                                 delimiter=",")
     for route in routes_file:
         model.addIATAs(catalog, route)
-    for route in routes_file:
-        model.isDirected_orNot(catalog, route)
+    
+    model.isDirected_orNot(catalog)
     return catalog
 # Funciones de ordenamiento
 
