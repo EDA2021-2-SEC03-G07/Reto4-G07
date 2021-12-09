@@ -54,15 +54,36 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
-            size= input("Ingrese el tamaño del archivo: ")
-            print("Cargando información de los archivos ....")
-            catalog = controller.init_Catalog()
-            controller.loadCSVs(catalog, size)
-            """print('Total aeropuertos en Dirigido: '+str(info[1]))
-            print('Total rutas en Dirigido: '+str(info[0]))
-            print('Total ciudades: '+str(info[2]))"""
+        size= input("Ingrese el tamaño del archivo: ")
+        print("Cargando información de los archivos ....")
+        catalog = controller.init_Catalog()
+        controller.loadCSVs(catalog, size)
+        """print('Total aeropuertos en Dirigido: '+str(info[1]))
+        print('Total rutas en Dirigido: '+str(info[0]))
+        print('Total ciudades: '+str(info[2]))"""
     elif int(inputs[0]) == 2:
-        pass
+        info= controller.inter_points(catalog)
+        print("Los aeropuertos mas interconectados son:")
+        print(info[0])
+        print("La cantidad de aeropuertos interconectados es: ")
+        print(info[1])
+    elif int(inputs[0]) == 3:
+        iata1= input("Ingrese el IATA del primer aeropuerto: ")
+        iata2= input("Ingrese el IATA del segundo aeropuerto: ")
+        info= controller.clusters(catalog,iata1,iata2)
+        print("El total de clusteres en la red es: "+ str(info[0]))
+        if info[1] == True:
+            print("...y los aeropuertos ingresados sí están en el mismo cluster.")
+        else:
+            print("...y los aeropuertos ingresados no están en el mismo cluster.")
+    elif int(inputs[0]) == 6:
+        iata= input("Ingrese el IATA del aeropuerto fuera de servicio: ")
+        info= controller.itsclosed(catalog,iata)
+        print("El número de aeropuertos afectados es: "+ str(info[0]))
+        print("Los primeros tres afectados son: ")
+        print(info[1])
+        print("Los últimos tres afectados son: ")
+        print(info[2])
 
     else:
         sys.exit(0)

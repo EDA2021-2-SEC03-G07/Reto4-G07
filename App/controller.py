@@ -55,8 +55,23 @@ def loadCSVs(catalog, size):
     for route in routes_file:
         model.addIATAs(catalog, route)
     
-    #model.isDirected_orNot(catalog)
+    """model.isDirected_orNot(catalog)"""
+    model.add_nonDirected(catalog)
+
     return catalog
+
+
+def inter_points(catalog):
+    info= model.inter_points(catalog)
+    return info
+
+def clusters(catalog,iata1,iata2):
+    info= model.clusters(catalog,iata1,iata2)
+    return info
+
+def itsclosed(catalog,iata):
+    info= model.itsclosed(catalog,iata)
+    return info
 
 # Funciones de ordenamiento
 
