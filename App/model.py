@@ -24,6 +24,7 @@
  * Dario Correal - Version inicial
  """
 
+from time import process_time
 import config as cf
 assert cf
 from DISClib.ADT import list as lt
@@ -165,63 +166,43 @@ def inter_points(catalog):
     i_connections = lt.newList(datastructure="ARRAY_LIST")
     routes = catalog['DirectedConnections']
     vertexs = gr.vertices(routes)
-
     for vertex in lt.iterator(vertexs):
         actualDegree = gr.indegree(routes, vertex) + gr.outdegree(routes, vertex)
         element = {}
         element["key"] = vertex
         element["value"] = actualDegree
         lt.addLast(Airports, element)
-    
     ms.sort(Airports, cmpDegree)
-    airportsize = lt.size(Airports)
     for i in range(1, 6):
         index= (lt.size(Airports)+1)-i
         IATA= lt.getElement(Airports, index)
         lt.addLast(i_connections, IATA["key"])
-
     lista_final= lt.subList(Airports,1,5)
     return lista_final, lt.size(i_connections)
 
 def clusters(catalog,iata1,iata2):
     SCC= strong_c.KosarajuSCC(catalog['DirectedConnections'])
-
     all_SCC= SCC["components"]
     id_SCC= SCC["idscc"]
-    same_cluster = "No está fuertemente conectado"
+    same_cluster = None
     value1= mp.get(id_SCC, iata1)["value"]
     value2= mp.get(id_SCC, iata2)["value"]
     if value1 == value2 and value1 != None:
         same_cluster= True 
     else:
         same_cluster= False
-
     return all_SCC, same_cluster
 
 def itsclosed(catalog,iata):
-    routes = catalog["DirectedConnections"]
-    All_Edges = gr.edges(routes) 
-    lst_final = lt.newList(datastructure="ARRAY_LIST")
-    for edge in lt.iterator(All_Edges):
-        if edge["vertexB"] == iata:
-            if not lt.isPresent(lst_final, edge["vertexA"]) == False:
-                lt.addLast(lst_final,  edge["vertexA"])
-
-        if edge["vertexA"] == iata:
-            if not lt.isPresent(lst_final, edge["vertexB"]) == False:
-                lt.addLast(lst_final,  edge["vertexB"])
-
-    """primeros3= lt.subList(lst_final,1,3)
-    #ultimos3= lt.subList(lst_final,-2,3)
-    ultimos= lt.subList(lst_final,0,lt.size(lst_final)+1)
-    Ultimos = lt.newList('ARRAY_LIST')
-    j = 0
-    while j < 3: #(5)
-        last = lt.removeLast(ultimos) #o(1)
-        lt.addLast(Ultimos, last) #o(1)
-        j += 1"""
-
-    return lt.size(lst_final), lst_final
+    gr.removeVertex(catalog["DirectedConnections"], iata)
+    gr.removeVertex(catalog["No_DirectedConnections"], iata)
+    damage = gr.adjacents(catalog["DirectedConnections"], iata)
+    lst_damage = lt.newList(datastructure="ARRAY_LIST")
+    for IATA in lt.iterator(damage):
+        if IATA not in lst_damage:
+            lt.addLast(lst_damage, IATA)
+    size_damaged = lt.size(lst_damage)
+    return catalog, size_damaged, lst_damage
 
 
 #AVANCE PARA HOMONIMAS
