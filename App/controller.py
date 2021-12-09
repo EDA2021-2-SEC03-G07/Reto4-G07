@@ -36,34 +36,28 @@ def init_Catalog():
     return model.init_Catalog()
 
 # Funciones para la carga de datos
-def loadCSVs(catalog):
-    """
-    Carga los datos de los archivos CSV en el modelo.
-    Se crea un arco entre cada par de estaciones que
-    pertenecen al mismo servicio y van en el mismo sentido.
-    addRouteConnection crea conexiones entre diferentes rutas
-    servidas en una misma estación.
-    """
-    citiesfile = cf.data_dir + 'worldcities.csv'
-    cities_file = csv.DictReader(open(citiesfile, encoding="utf-8"),
-                                delimiter=",")
+def loadCSVs(catalog, size):
+    citiesfile = cf.data_dir + 'worldcities-utf8.csv'
+    #cities_file = csv.DictReader(open(citiesfile, encoding="utf-8"),
+    #                            delimiter=",")
     # for city in cities_file:
     #     model.addCity(catalog, city)
         
-    airportsfile = cf.data_dir + 'airports_full.csv'
+    airportsfile = cf.data_dir + 'airports-utf8-'+size+'.csv'
     airports_file = csv.DictReader(open(airportsfile, encoding="utf-8"),
                                 delimiter=",")
     for airport in airports_file:
         model.addAirport(catalog, airport)
 
-    routesfile = cf.data_dir + 'routes_full.csv'
+    routesfile = cf.data_dir + 'routes-utf8-'+size+'.csv'
     routes_file = csv.DictReader(open(routesfile, encoding="utf-8"),
                                 delimiter=",")
     for route in routes_file:
         model.addIATAs(catalog, route)
     
-    model.isDirected_orNot(catalog)
+    #model.isDirected_orNot(catalog)
     return catalog
+
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo

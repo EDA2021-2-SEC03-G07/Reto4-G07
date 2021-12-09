@@ -54,12 +54,13 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
+            size= input("Ingrese el tamaño del archivo: ")
             print("Cargando información de los archivos ....")
             catalog = controller.init_Catalog()
-            controller.loadCSVs(catalog)
-            print('Total aeropuertos en Dirigido: '+str(info[1]))
+            controller.loadCSVs(catalog, size)
+            """print('Total aeropuertos en Dirigido: '+str(info[1]))
             print('Total rutas en Dirigido: '+str(info[0]))
-            print('Total ciudades: '+str(info[2]))
+            print('Total ciudades: '+str(info[2]))"""
     elif int(inputs[0]) == 2:
         pass
 

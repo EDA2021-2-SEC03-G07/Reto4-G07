@@ -45,7 +45,9 @@ def init_Catalog(): #Comentar
     try:
         catalog =  {'DirectedConnections':None,
                     'No_DirectedConnections': None,
-                    "IATAs": None}
+                    "IATAs": None,
+                    "distances": None}
+
         catalog['DirectedConnections'] = gr.newGraph(datastructure='ADJ_LIST',
                                             directed=True,
                                             size=10000,
@@ -62,11 +64,16 @@ def init_Catalog(): #Comentar
     except Exception as exp:
          error.reraise(exp, 'model:init_Catalog((')
 
+
+
 # Funciones para agregar informacion al catalogo
             #Para poder seleccionar que sean digrafos y no dirigidos hay que hacer una función de comparación en donde
             #Hacer dos For in en donde se recorra el mapa[IATA]. El primero recorrerá las llaves, y el segundo la lista que contiene los IATA que tienen como destino
             #el IATA-key.
             # Después de eso un mp.get en el mapa IATA_cities con cada valor de la lista. Si está, hacer un lt.isPresent con la lista de valores  
+
+
+
 def addIATAs(catalog, IATA): #Teniendo esto, ya es posible hacer la comparación para definir directed y no directed
     #ADICIÓN A LA HASHTABLE
     Maps_IATA = catalog['IATAs']
@@ -90,6 +97,9 @@ def addIATAs(catalog, IATA): #Teniendo esto, ya es posible hacer la comparación
 
     return catalog
 
+
+
+
 def addAirport(catalog, airport):
     IATA = airport['IATA']
     graph_directed = catalog['DirectedConnections']
@@ -97,6 +107,10 @@ def addAirport(catalog, airport):
     if gr.containsVertex(graph_directed, IATA) == False:
         gr.insertVertex(graph_directed, IATA)
         gr.insertVertex(graph_Nodirected, IATA)
+
+
+
+
 
 def isDirected_orNot(catalog):
     Maps_IATAS = catalog['IATAs']
@@ -117,6 +131,9 @@ def isDirected_orNot(catalog):
                         distancia= me.getValue(mp.get(catalog["distances"], Origin_Destino))
                         addConnection_Directed(catalog, origen_key, destinations, distancia)
     return catalog
+
+
+
 
 def addConnection_Directed(catalog, origin, destination, distance):
     edge = gr.getEdge(catalog['DirectedConnections'], origin, destination) #Si no se encuentra el arco entre los vértices en parametro
