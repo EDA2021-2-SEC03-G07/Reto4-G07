@@ -63,8 +63,6 @@ def init_Catalog(): #Comentar
                                             directed=False,
                                             size=10,
                                             comparefunction=None)
-        catalog["latitudes"] = om.newMap(omaptype='RBT',comparefunction= None)
-        catalog["cities"] = mp.newMap(numelements=37500,maptype="PROBING", comparefunction=None)
         catalog["IATAs"] = mp.newMap(maptype='CHAINING',comparefunction=None)
 
         return catalog
@@ -233,7 +231,6 @@ def itsclosed(catalog,iata):
 
 
 def cmpDegree(degree1, degree2):
-
     degree1 = int(degree1["value"])
     degree2 = int(degree2["value"])
     return degree1 > degree2
